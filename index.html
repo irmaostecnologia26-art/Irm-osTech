@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Irmãos Tech</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'ui-sans-serif', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', 'sans-serif'],
+                    },
+                    colors: {
+                        classic: {
+                            light: '#ffffff',
+                            dark: '#121212',
+                            gray: '#f5f5f5',
+                            darkGray: '#1e1e1e'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        /* Smooth transitions globais */
+        body {
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        .smooth-transition {
+            transition: all 0.3s ease;
+        }
+        
+        /* Loading Spinner estilo 'cobrinha' */
+        .spinner {
+            width: 60px;
+            height: 60px;
+            border: 5px solid rgba(59, 130, 246, 0.2); /* Azul claro */
+            border-top: 5px solid #3b82f6; /* Azul forte */
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Ocultar barra de rolagem onde necessário mas permitir rolagem */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="bg-classic-light text-gray-900 dark:bg-classic-dark dark:text-gray-100 min-h-screen flex flex-col font-sans relative">
+
+    <!-- TELA DE CARREGAMENTO -->
+    <div id="loading-screen" class="fixed inset-0 z-50 bg-white dark:bg-gray-900 flex flex-col items-center justify-center transition-opacity duration-300">
+        <div class="spinner mb-6"></div>
+        <h2 class="text-2xl font-bold tracking-widest text-blue-600 dark:text-blue-400">ESPERE UM POUCO!</h2>
+    </div>
+
+    <!-- CABEÇALHO -->
+    <header class="w-full p-4 flex justify-between items-center bg-white/80 dark:bg-gray-900/80 backdrop-blur-md fixed top-0 z-30 shadow-sm">
+        
+        <!-- Controles da Esquerda -->
+        <div class="flex items-center gap-4">
+            <!-- Alternador de Tema -->
+            <button id="theme-toggle" class="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center hover:bg-gray-200 dark:hover:bg-gray-700 smooth-transition shadow-sm" aria-label="Alternar Tema">
+                <i id="theme-icon" class="fas fa-moon text-gray-600 dark:text-gray-300 text-lg"></i>
+            </button>
+            
+            <!-- Instagram -->
+            <a href="https://www.instagram.com/irmaos_tech.shangrila/" target="_blank" class="w-10 h-10 rounded-full bg-gradient-to-tr from-yellow-400 via-red-500 to-purple-500 text-white flex items-center justify-center hover:scale-110 smooth-transition shadow-sm" aria-label="Instagram">
+                <i class="fab fa-instagram text-xl"></i>
+            </a>
+        </div>
+
+        <!-- Autenticação (Firebase) -->
+        <div id="auth-section" class="flex items-center gap-3">
+            <!-- Logado -->
+            <div id="user-info" class="hidden items-center gap-3">
+                <span id="user-name" class="font-medium hidden sm:block"></span>
+                <img id="user-avatar" src="" alt="Foto de Perfil" class="w-10 h-10 rounded-full border-2 border-blue-500 object-cover shadow-sm">
+                <button id="btn-logout" class="ml-2 text-sm text-red-500 hover:text-red-700 dark:hover:text-red-400 font-medium smooth-transition" aria-label="Sair">
+                    <i class="fas fa-sign-out-alt"></i>
+                </button>
+            </div>
+            
+            <!-- Deslogado -->
+            <button id="btn-login" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-full font-medium shadow-md flex items-center gap-2 smooth-transition">
+                <i class="fab fa-google"></i>
+                <span class="hidden sm:inline">Logar com Google</span>
+                <span class="sm:hidden">Logar</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- CONTEÚDO PRINCIPAL -->
+    <main class="flex-grow flex flex-col items-center justify-center p-4 mt-20">
+        
+        <div class="w-full max-w-2xl flex flex-col items-center">
+            
+            <!-- Título -->
+            <h1 class="text-4xl md:text-6xl font-extrabold tracking-tight mb-8 text-center bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-800 dark:from-blue-400 dark:to-indigo-400">
+                IRMÃOS TECH
+            </h1>
+            
+            <!-- Formulário -->
+            <div class="w-full bg-classic-gray dark:bg-classic-darkGray rounded-2xl shadow-xl p-6 md:p-8 smooth-transition border border-gray-200 dark:border-gray-700">
+                <label for="user-input" class="block text-lg font-semibold mb-3 text-gray-700 dark:text-gray-300">
+                    O QUE VOCÊ PRECISA?
+                </label>
+                
+                <textarea id="user-input" rows="5" class="w-full p-4 rounded-xl bg-white dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-600 focus:border-blue-500 focus:ring-0 dark:focus:border-blue-500 outline-none resize-none smooth-transition text-gray-800 dark:text-gray-100 text-lg shadow-inner placeholder-gray-400" placeholder="Descreva aqui o seu problema ou serviço que necessita..."></textarea>
+                
+                <p id="error-message" class="text-red-500 font-medium mt-2 hidden text-sm"><i class="fas fa-exclamation-circle mr-1"></i> Por favor, digite o que você precisa antes de enviar.</p>
+                
+                <div class="mt-6 flex justify-center h-14">
+                    <!-- Botão Passo 1 -->
+                    <button id="btn-step-1" class="w-full md:w-2/3 bg-gray-800 hover:bg-black dark:bg-gray-100 dark:hover:bg-white text-white dark:text-black text-lg font-bold py-3 px-6 rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 smooth-transition">
+                        <i class="fas fa-paper-plane mr-2"></i> ENVIAR SOLICITAÇÃO
+                    </button>
+                    
+                    <!-- Botão Passo 2 (Final - WhatsApp) -->
+                    <button id="btn-step-2" class="w-full md:w-3/4 bg-green-500 hover:bg-green-600 text-white text-lg font-bold py-3 px-6 rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 smooth-transition hidden animate-pulse">
+                        <i class="fab fa-whatsapp text-xl mr-2"></i> ENVIAR PARA ALGUM FUNCIONARIO!
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- BOTÃO HELP (Flutuante) -->
+    <button id="btn-help" class="fixed bottom-6 right-6 w-14 h-14 bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-2xl flex items-center justify-center text-2xl hover:scale-110 smooth-transition z-40" aria-label="Ajuda">
+        <i class="fas fa-question"></i>
+    </button>
+
+    <!-- MODAL HELP (Tutorial) -->
+    <div id="modal-help" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center hidden opacity-0 smooth-transition">
+        <div class="bg-white dark:bg-gray-800 w-11/12 max-w-md rounded-2xl shadow-2xl p-6 transform scale-95 transition-transform duration-300" id="modal-content">
+            <div class="flex justify-between items-center mb-5 border-b pb-3 dark:border-gray-700">
+                <h3 class="text-2xl font-bold text-blue-600 dark:text-blue-400">Como usar o site?</h3>
+                <button id="btn-close-help" class="text-gray-500 hover:text-gray-800 dark:hover:text-white smooth-transition text-xl">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="space-y-6">
+                <div class="flex items-start gap-4">
+                    <div class="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold flex-shrink-0">1</div>
+                    <div>
+                        <h4 class="font-bold text-lg dark:text-gray-200">Descreva seu problema</h4>
+                        <p class="text-gray-600 dark:text-gray-400 text-sm">Digite no campo de texto central exatamente o que você precisa ou o problema do seu equipamento.</p>
+                    </div>
+                </div>
+                
+                <div class="flex items-start gap-4">
+                    <div class="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold flex-shrink-0">2</div>
+                    <div>
+                        <h4 class="font-bold text-lg dark:text-gray-200">Clique em Enviar</h4>
+                        <p class="text-gray-600 dark:text-gray-400 text-sm">Clique no botão escuro de enviar. Nosso sistema irá processar sua solicitação rapidamente.</p>
+                    </div>
+                </div>
+                
+                <div class="flex items-start gap-4">
+                    <div class="w-8 h-8 rounded-full bg-green-100 text-green-600 flex items-center justify-center font-bold flex-shrink-0">3</div>
+                    <div>
+                        <h4 class="font-bold text-lg dark:text-gray-200">Fale com um Funcionário</h4>
+                        <p class="text-gray-600 dark:text-gray-400 text-sm">Clique no botão verde que irá aparecer para abrir o WhatsApp diretamente com nossa equipe técnica!</p>
+                    </div>
+                </div>
+            </div>
+            
+            <button id="btn-understand" class="w-full mt-8 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl smooth-transition">
+                Entendi!
+            </button>
+        </div>
+    </div>
+
+    <!-- Firebase e Lógica Principal -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+
+        // Configuração exata fornecida
+        const firebaseConfig = {
+            apiKey: "AIzaSyAWaaNJiMavKH3sYbWMDnnuI2Oc7dzo0No",
+            authDomain: "irmaostech-506a7.firebaseapp.com",
+            projectId: "irmaostech-506a7",
+            storageBucket: "irmaostech-506a7.firebasestorage.app",
+            messagingSenderId: "149469563446",
+            appId: "1:149469563446:web:eafdf15e2c4527d45f2697",
+            measurementId: "G-RVWQXPPXTL"
+        };
+
+        // Inicializar Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const provider = new GoogleAuthProvider();
+
+        // Referências do DOM
+        const loadingScreen = document.getElementById('loading-screen');
+        
+        // Elementos de UI
+        const themeToggle = document.getElementById('theme-toggle');
+        const themeIcon = document.getElementById('theme-icon');
+        const htmlElement = document.documentElement;
+        
+        const btnHelp = document.getElementById('btn-help');
+        const modalHelp = document.getElementById('modal-help');
+        const btnCloseHelp = document.getElementById('btn-close-help');
+        const btnUnderstand = document.getElementById('btn-understand');
+        const modalContent = document.getElementById('modal-content');
+        
+        const userInput = document.getElementById('user-input');
+        const btnStep1 = document.getElementById('btn-step-1');
+        const btnStep2 = document.getElementById('btn-step-2');
+        const errorMsg = document.getElementById('error-message');
+        
+        const btnLogin = document.getElementById('btn-login');
+        const btnLogout = document.getElementById('btn-logout');
+        const userInfo = document.getElementById('user-info');
+        const userName = document.getElementById('user-name');
+        const userAvatar = document.getElementById('user-avatar');
+
+        // ==========================================
+        // UTILITÁRIOS: TELA DE CARREGAMENTO
+        // ==========================================
+        function showLoading(duration = 0, callback = null) {
+            loadingScreen.classList.remove('hidden', 'opacity-0');
+            loadingScreen.classList.add('flex', 'opacity-100');
+            
+            if (duration > 0) {
+                setTimeout(() => {
+                    hideLoading();
+                    if(callback) callback();
+                }, duration);
+            }
+        }
+
+        function hideLoading() {
+            loadingScreen.classList.remove('opacity-100');
+            loadingScreen.classList.add('opacity-0');
+            setTimeout(() => {
+                loadingScreen.classList.remove('flex');
+                loadingScreen.classList.add('hidden');
+            }, 300); // tempo da transição
+        }
+
+        // Esconde a tela de loading ao abrir a página (após simular pequeno carregamento)
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                hideLoading();
+            }, 800);
+        });
+
+        // ==========================================
+        // LÓGICA DO TEMA (Claro/Escuro)
+        // ==========================================
+        // Verificar preferência salva
+        if (localStorage.getItem('theme') === 'dark') {
+            htmlElement.classList.add('dark');
+            themeIcon.classList.replace('fa-moon', 'fa-sun');
+        } else {
+            htmlElement.classList.remove('dark'); // Padrão Branco (Light Mode)
+            themeIcon.classList.replace('fa-sun', 'fa-moon');
+        }
+
+        themeToggle.addEventListener('click', () => {
+            htmlElement.classList.toggle('dark');
+            
+            if (htmlElement.classList.contains('dark')) {
+                themeIcon.classList.replace('fa-moon', 'fa-sun');
+                localStorage.setItem('theme', 'dark');
+            } else {
+                themeIcon.classList.replace('fa-sun', 'fa-moon');
+                localStorage.setItem('theme', 'light');
+            }
+        });
+
+        // ==========================================
+        // LÓGICA DO FORMULÁRIO & WHATSAPP
+        // ==========================================
+        btnStep1.addEventListener('click', () => {
+            const text = userInput.value.trim();
+            
+            if (!text) {
+                errorMsg.classList.remove('hidden');
+                userInput.classList.add('border-red-500');
+                userInput.focus();
+                return;
+            }
+            
+            errorMsg.classList.add('hidden');
+            userInput.classList.remove('border-red-500');
+            
+            // Mostra loading por 2 segundos e depois troca os botões
+            showLoading(2000, () => {
+                btnStep1.classList.add('hidden');
+                btnStep2.classList.remove('hidden');
+            });
+        });
+
+        btnStep2.addEventListener('click', () => {
+            const text = userInput.value.trim();
+            const encodedText = encodeURIComponent(text);
+            const whatsappUrl = `https://wa.me/554195670609?text=${encodedText}`;
+            
+            // Abre o whatsapp e reseta o formulário
+            window.open(whatsappUrl, '_blank');
+            
+            // Reseta UI
+            btnStep2.classList.add('hidden');
+            btnStep1.classList.remove('hidden');
+            userInput.value = '';
+        });
+
+        // Esconder erro ao digitar
+        userInput.addEventListener('input', () => {
+            errorMsg.classList.add('hidden');
+            userInput.classList.remove('border-red-500');
+        });
+
+        // ==========================================
+        // LÓGICA DO MODAL HELP
+        // ==========================================
+        function openHelp() {
+            modalHelp.classList.remove('hidden');
+            // Pequeno atraso para a animação CSS aplicar sobre o display block
+            setTimeout(() => {
+                modalHelp.classList.remove('opacity-0');
+                modalContent.classList.remove('scale-95');
+                modalContent.classList.add('scale-100');
+            }, 10);
+        }
+
+        function closeHelp() {
+            modalHelp.classList.add('opacity-0');
+            modalContent.classList.remove('scale-100');
+            modalContent.classList.add('scale-95');
+            setTimeout(() => {
+                modalHelp.classList.add('hidden');
+            }, 300);
+        }
+
+        btnHelp.addEventListener('click', openHelp);
+        btnCloseHelp.addEventListener('click', closeHelp);
+        btnUnderstand.addEventListener('click', closeHelp);
+        
+        // Fechar ao clicar fora
+        modalHelp.addEventListener('click', (e) => {
+            if (e.target === modalHelp) closeHelp();
+        });
+
+        // ==========================================
+        // FIREBASE AUTHENTICATION (Google Login)
+        // ==========================================
+        
+        // Ação do Botão Logar
+        btnLogin.addEventListener('click', async () => {
+            showLoading(); // Exibe loading durante o processo
+            try {
+                await signInWithPopup(auth, provider);
+                hideLoading();
+            } catch (error) {
+                console.error("Erro ao fazer login:", error);
+                hideLoading();
+                // Observação: Na visualização Sandbox do Canvas algumas políticas de popups
+                // podem bloquear, mas o código está correto para produção.
+            }
+        });
+
+        // Ação do Botão Deslogar
+        btnLogout.addEventListener('click', async () => {
+            showLoading(1000, async () => {
+                try {
+                    await signOut(auth);
+                } catch (error) {
+                    console.error("Erro ao deslogar:", error);
+                }
+            });
+        });
+
+        // Observador de Estado de Autenticação (Monitora a Sessão)
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                // Usuário está logado
+                btnLogin.classList.add('hidden');
+                userInfo.classList.remove('hidden');
+                userInfo.classList.add('flex');
+                
+                // Pega primeiro nome
+                const firstName = user.displayName ? user.displayName.split(' ')[0] : 'Usuário';
+                userName.textContent = `Olá, ${firstName}`;
+                userAvatar.src = user.photoURL || 'https://via.placeholder.com/40';
+            } else {
+                // Usuário deslogado
+                userInfo.classList.remove('flex');
+                userInfo.classList.add('hidden');
+                btnLogin.classList.remove('hidden');
+            }
+        });
+
+    </script>
+</body>
+</html>
