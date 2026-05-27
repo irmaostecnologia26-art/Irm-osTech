@@ -1,352 +1,535 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" class="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Acesso Seguro</title>
+    <title>Irmãos Tech</title>
+    
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'ui-sans-serif', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', 'sans-serif'],
+                    },
+                    colors: {
+                        classic: {
+                            light: '#ffffff',
+                            dark: '#121212',
+                            gray: '#f5f5f5',
+                            darkGray: '#1e1e1e'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
     <style>
+        /* Smooth transitions globais */
         body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f8fafc;
-            overflow-x: hidden;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        .smooth-transition {
+            transition: all 0.3s ease;
         }
         
-        .fade-in {
-            animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        /* Loading Spinner estilo 'cobrinha' */
+        .spinner {
+            width: 60px;
+            height: 60px;
+            border: 5px solid rgba(59, 130, 246, 0.2);
+            border-top: 5px solid #3b82f6;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
         }
         
-        .slide-up {
-            animation: slideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        @keyframes slideUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .step-container {
+        .no-scrollbar::-webkit-scrollbar {
             display: none;
         }
-
-        .step-container.active {
-            display: block;
-            animation: fadeIn 0.3s ease-out forwards;
-        }
-
-        /* Custom Toast */
-        #toast-container {
-            position: fixed;
-            top: 1rem;
-            right: 1rem;
-            z-index: 50;
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-        }
-
-        .toast {
-            background: white;
-            border-left: 4px solid #3b82f6;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-            padding: 1rem 1.5rem;
-            border-radius: 0.5rem;
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            transform: translateX(120%);
-            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .toast.show {
-            transform: translateX(0);
-        }
-
-        .toast.error {
-            border-left-color: #ef4444;
-        }
-
-        .toast.success {
-            border-left-color: #10b981;
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
         }
     </style>
 </head>
-<body class="min-h-screen flex items-center justify-center p-4">
+<body class="bg-classic-light text-gray-900 dark:bg-classic-dark dark:text-gray-100 min-h-screen flex flex-col font-sans relative">
 
-    <div id="toast-container"></div>
-
-    <div class="max-w-md w-full bg-white rounded-2xl shadow-xl p-8 relative overflow-hidden slide-up">
-        
-        <!-- Logo / Header -->
-        <div class="text-center mb-8">
-            <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-blue-50 text-blue-600 mb-4">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8V7a4 4 0 00-8 0v4h8z" />
-                </svg>
-            </div>
-            <h2 class="text-2xl font-bold text-gray-900" id="main-title">Acessar Conta</h2>
-            <p class="text-sm text-gray-500 mt-2" id="main-subtitle">Insira seu e-mail para continuar</p>
-        </div>
-
-        <!-- Step 1: Email Input -->
-        <div id="step-email" class="step-container active">
-            <form id="form-email" class="space-y-4">
-                <div>
-                    <label for="email" class="block text-sm font-medium text-gray-700 mb-1">E-mail</label>
-                    <input type="email" id="email" required placeholder="seu@email.com" 
-                        class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all text-gray-900">
-                </div>
-                <button type="submit" 
-                    class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors flex justify-center items-center gap-2">
-                    Continuar
-                </button>
-            </form>
-        </div>
-
-        <!-- Step 2: Verification Code -->
-        <div id="step-code" class="step-container">
-            <form id="form-code" class="space-y-4">
-                <div>
-                    <label for="code" class="block text-sm font-medium text-gray-700 mb-1">Código de 6 dígitos</label>
-                    <div class="text-xs text-gray-500 mb-3">Enviamos um código para <span id="display-email-code" class="font-semibold text-gray-700"></span></div>
-                    <input type="text" id="code" required maxlength="6" pattern="\d{6}" placeholder="000000" autocomplete="one-time-code"
-                        class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all text-center text-2xl tracking-widest font-mono text-gray-900">
-                </div>
-                <button type="submit" 
-                    class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors">
-                    Verificar Código
-                </button>
-                <button type="button" onclick="goToStep('email')" class="w-full text-sm text-gray-500 hover:text-gray-700 py-2">
-                    Voltar
-                </button>
-            </form>
-        </div>
-
-        <!-- Step 3: Create Password -->
-        <div id="step-create-password" class="step-container">
-            <form id="form-create-password" class="space-y-4">
-                <div>
-                    <label for="new-password" class="block text-sm font-medium text-gray-700 mb-1">Crie uma Senha</label>
-                    <div class="text-xs text-gray-500 mb-3">Para o e-mail: <span id="display-email-create" class="font-semibold text-gray-700"></span></div>
-                    <input type="password" id="new-password" required placeholder="••••••••"
-                        class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all text-gray-900">
-                    <p class="text-xs text-gray-500 mt-2 flex items-center gap-1">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                        Deve conter pelo menos um número ou símbolo
-                    </p>
-                </div>
-                <button type="submit" 
-                    class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors">
-                    Registrar e Entrar
-                </button>
-            </form>
-        </div>
-
-        <!-- Step 4: Login Password -->
-        <div id="step-login-password" class="step-container">
-            <form id="form-login-password" class="space-y-4">
-                <div>
-                    <label for="login-password" class="block text-sm font-medium text-gray-700 mb-1">Senha</label>
-                    <div class="text-xs text-gray-500 mb-3">Bem-vindo de volta, <span id="display-email-login" class="font-semibold text-gray-700"></span></div>
-                    <input type="password" id="login-password" required placeholder="••••••••"
-                        class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all text-gray-900">
-                </div>
-                <button type="submit" 
-                    class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors">
-                    Entrar
-                </button>
-                <button type="button" onclick="goToStep('email')" class="w-full text-sm text-gray-500 hover:text-gray-700 py-2">
-                    Entrar com outra conta
-                </button>
-            </form>
-        </div>
-
-        <!-- Step 5: Logged In Success -->
-        <div id="step-success" class="step-container text-center py-8">
-            <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-green-100 text-green-500 mb-4 mx-auto">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-                </svg>
-            </div>
-            <h3 class="text-xl font-bold text-gray-900 mb-2">Sucesso!</h3>
-            <p class="text-gray-600 mb-6">Você está autenticado no sistema.</p>
-            <button onclick="logout()" 
-                class="w-full bg-gray-100 hover:bg-gray-200 text-gray-800 font-medium py-3 px-4 rounded-lg transition-colors">
-                Sair
-            </button>
-        </div>
-
+    <!-- TELA DE CARREGAMENTO -->
+    <div id="loading-screen" class="fixed inset-0 z-50 bg-white dark:bg-gray-900 flex flex-col items-center justify-center transition-opacity duration-300">
+        <div class="spinner mb-6"></div>
+        <h2 class="text-2xl font-bold tracking-widest text-blue-600 dark:text-blue-400">ESPERE UM POUCO!</h2>
     </div>
 
-    <script>
-        /**
-         * Banco de dados em memória para simular o armazenamento de usuários.
-         * Formato: { "usuario@gmail.com": { password: "..." } }
-         */
-        const usersDatabase = new Map();
+    <!-- CABEÇALHO -->
+    <header class="w-full p-4 flex justify-between items-center bg-white/80 dark:bg-gray-900/80 backdrop-blur-md fixed top-0 z-30 shadow-sm">
         
-        // Estado global da aplicação
-        let currentEmail = '';
-        let generatedCode = '';
+        <!-- Controles da Esquerda -->
+        <div class="flex items-center gap-4">
+            <!-- Alternador de Tema -->
+            <button id="theme-toggle" class="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center hover:bg-gray-200 dark:hover:bg-gray-700 smooth-transition shadow-sm" aria-label="Alternar Tema">
+                <i id="theme-icon" class="fas fa-moon text-gray-600 dark:text-gray-300 text-lg"></i>
+            </button>
+            
+            <!-- Instagram -->
+            <a href="https://www.instagram.com/irmaos_tech.shangrila/" target="_blank" class="w-10 h-10 rounded-full bg-gradient-to-tr from-yellow-400 via-red-500 to-purple-500 text-white flex items-center justify-center hover:scale-110 smooth-transition shadow-sm" aria-label="Instagram">
+                <i class="fab fa-instagram text-xl"></i>
+            </a>
+        </div>
 
-        // Referências DOM
-        const titleEl = document.getElementById('main-title');
-        const subtitleEl = document.getElementById('main-subtitle');
-        const toastContainer = document.getElementById('toast-container');
+        <!-- Autenticação (Firebase Real) -->
+        <div id="auth-section" class="flex items-center gap-3">
+            <!-- Logado -->
+            <div id="user-info" class="hidden items-center gap-3">
+                <span id="user-name" class="font-medium hidden sm:block"></span>
+                <img id="user-avatar" src="" alt="Foto de Perfil" class="w-10 h-10 rounded-full border-2 border-blue-500 object-cover shadow-sm">
+                <button id="btn-logout" class="ml-2 text-sm text-red-500 hover:text-red-700 dark:hover:text-red-400 font-medium smooth-transition" aria-label="Sair">
+                    <i class="fas fa-sign-out-alt"></i>
+                </button>
+            </div>
+            
+            <!-- Deslogado -->
+            <button id="btn-login" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-full font-medium shadow-md flex items-center gap-2 smooth-transition">
+                <i class="fas fa-user"></i>
+                <span class="hidden sm:inline">Entrar / Cadastrar</span>
+                <span class="sm:hidden">Entrar</span>
+            </button>
+        </div>
+    </header>
 
-        // Configuração de Títulos por Etapa
-        const stepConfigs = {
-            'email': { title: 'Acessar Conta', subtitle: 'Insira seu e-mail para continuar' },
-            'code': { title: 'Verificação', subtitle: 'Confirme sua identidade' },
-            'create-password': { title: 'Criar Senha', subtitle: 'Proteja sua nova conta' },
-            'login-password': { title: 'Bem-vindo de volta', subtitle: 'Insira sua senha para acessar' },
-            'success': { title: 'Área Restrita', subtitle: 'Acesso liberado' }
+    <!-- CONTEÚDO PRINCIPAL -->
+    <main class="flex-grow flex flex-col items-center justify-center p-4 mt-20">
+        
+        <div class="w-full max-w-2xl flex flex-col items-center">
+            
+            <!-- Título -->
+            <h1 class="text-4xl md:text-6xl font-extrabold tracking-tight mb-8 text-center bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-800 dark:from-blue-400 dark:to-indigo-400">
+                IRMÃOS TECH
+            </h1>
+            
+            <!-- Formulário -->
+            <div class="w-full bg-classic-gray dark:bg-classic-darkGray rounded-2xl shadow-xl p-6 md:p-8 smooth-transition border border-gray-200 dark:border-gray-700">
+                <label for="user-input" class="block text-lg font-semibold mb-3 text-gray-700 dark:text-gray-300">
+                    O QUE VOCÊ PRECISA?
+                </label>
+                
+                <textarea id="user-input" rows="5" class="w-full p-4 rounded-xl bg-white dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-600 focus:border-blue-500 focus:ring-0 dark:focus:border-blue-500 outline-none resize-none smooth-transition text-gray-800 dark:text-gray-100 text-lg shadow-inner placeholder-gray-400" placeholder="Descreva aqui o seu problema ou serviço que necessita..."></textarea>
+                
+                <p id="error-message" class="text-red-500 font-medium mt-2 hidden text-sm"><i class="fas fa-exclamation-circle mr-1"></i> Por favor, digite o que você precisa antes de enviar.</p>
+                
+                <div class="mt-6 flex justify-center h-14">
+                    <!-- Botão Passo 1 -->
+                    <button id="btn-step-1" class="w-full md:w-2/3 bg-gray-800 hover:bg-black dark:bg-gray-100 dark:hover:bg-white text-white dark:text-black text-lg font-bold py-3 px-6 rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 smooth-transition">
+                        <i class="fas fa-paper-plane mr-2"></i> ENVIAR SOLICITAÇÃO
+                    </button>
+                    
+                    <!-- Botão Passo 2 (Final - WhatsApp) -->
+                    <button id="btn-step-2" class="w-full md:w-3/4 bg-green-500 hover:bg-green-600 text-white text-lg font-bold py-3 px-6 rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 smooth-transition hidden animate-pulse">
+                        <i class="fab fa-whatsapp text-xl mr-2"></i> ENVIAR PARA ALGUM FUNCIONARIO!
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- BOTÃO HELP (Flutuante) -->
+    <button id="btn-help" class="fixed bottom-6 right-6 w-14 h-14 bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-2xl flex items-center justify-center text-2xl hover:scale-110 smooth-transition z-40" aria-label="Ajuda">
+        <i class="fas fa-question"></i>
+    </button>
+
+    <!-- MODAL HELP (Tutorial) -->
+    <div id="modal-help" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center hidden opacity-0 smooth-transition">
+        <div class="bg-white dark:bg-gray-800 w-11/12 max-w-md rounded-2xl shadow-2xl p-6 transform scale-95 transition-transform duration-300" id="modal-content">
+            <div class="flex justify-between items-center mb-5 border-b pb-3 dark:border-gray-700">
+                <h3 class="text-2xl font-bold text-blue-600 dark:text-blue-400">Como usar o site?</h3>
+                <button id="btn-close-help" class="text-gray-500 hover:text-gray-800 dark:hover:text-white smooth-transition text-xl">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="space-y-6">
+                <div class="flex items-start gap-4">
+                    <div class="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold flex-shrink-0">1</div>
+                    <div>
+                        <h4 class="font-bold text-lg dark:text-gray-200">Descreva seu problema</h4>
+                        <p class="text-gray-600 dark:text-gray-400 text-sm">Digite no campo de texto central exatamente o que você precisa ou o problema do seu equipamento.</p>
+                    </div>
+                </div>
+                
+                <div class="flex items-start gap-4">
+                    <div class="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold flex-shrink-0">2</div>
+                    <div>
+                        <h4 class="font-bold text-lg dark:text-gray-200">Clique em Enviar</h4>
+                        <p class="text-gray-600 dark:text-gray-400 text-sm">Clique no botão escuro de enviar. Nosso sistema irá processar sua solicitação rapidamente.</p>
+                    </div>
+                </div>
+                
+                <div class="flex items-start gap-4">
+                    <div class="w-8 h-8 rounded-full bg-green-100 text-green-600 flex items-center justify-center font-bold flex-shrink-0">3</div>
+                    <div>
+                        <h4 class="font-bold text-lg dark:text-gray-200">Fale com um Funcionário</h4>
+                        <p class="text-gray-600 dark:text-gray-400 text-sm">Clique no botão verde que irá aparecer para abrir o WhatsApp diretamente com nossa equipe técnica!</p>
+                    </div>
+                </div>
+            </div>
+            
+            <button id="btn-understand" class="w-full mt-8 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl smooth-transition">
+                Entendi!
+            </button>
+        </div>
+    </div>
+
+    <!-- MODAL DE AUTENTICAÇÃO (Nome de Usuário e Senha) -->
+    <div id="modal-auth" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center hidden opacity-0 smooth-transition">
+        <div class="bg-white dark:bg-gray-800 w-11/12 max-w-md rounded-2xl shadow-2xl p-6 transform scale-95 transition-transform duration-300" id="auth-modal-content">
+            <div class="flex justify-between items-center mb-5 border-b pb-3 dark:border-gray-700">
+                <h3 class="text-2xl font-bold text-blue-600 dark:text-blue-400" id="auth-title">Entrar na Conta</h3>
+                <button id="btn-close-auth" class="text-gray-500 hover:text-gray-800 dark:hover:text-white smooth-transition text-xl">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <form id="auth-form" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Nome de Usuário</label>
+                    <input type="text" id="auth-username" required placeholder="Ex: seunome123" 
+                        class="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none transition-colors">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Senha</label>
+                    <input type="password" id="auth-password" required placeholder="••••••••" 
+                        class="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none transition-colors">
+                </div>
+
+                <div id="auth-error" class="text-red-500 text-sm hidden font-medium flex items-center gap-1">
+                    <i class="fas fa-exclamation-circle"></i> <span id="auth-error-msg"></span>
+                </div>
+
+                <button type="submit" id="btn-submit-auth" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl smooth-transition mt-2 shadow-md">
+                    Entrar
+                </button>
+            </form>
+
+            <div class="mt-5 text-center border-t dark:border-gray-700 pt-4">
+                <p class="text-sm text-gray-600 dark:text-gray-400">
+                    <span id="auth-toggle-text">Não tem uma conta?</span>
+                    <button type="button" id="btn-toggle-auth" class="text-blue-600 dark:text-blue-400 font-bold hover:underline ml-1">
+                        Registre-se
+                    </button>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase e Lógica Principal -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut, updateProfile } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+
+        // Configuração exata fornecida
+        const firebaseConfig = {
+            apiKey: "AIzaSyAWaaNJiMavKH3sYbWMDnnuI2Oc7dzo0No",
+            authDomain: "irmaostech-506a7.firebaseapp.com",
+            projectId: "irmaostech-506a7",
+            storageBucket: "irmaostech-506a7.firebasestorage.app",
+            messagingSenderId: "149469563446",
+            appId: "1:149469563446:web:eafdf15e2c4527d45f2697",
+            measurementId: "G-RVWQXPPXTL"
         };
 
+        // Inicializar Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+
+        // Referências do DOM
+        const loadingScreen = document.getElementById('loading-screen');
+        const themeToggle = document.getElementById('theme-toggle');
+        const themeIcon = document.getElementById('theme-icon');
+        const htmlElement = document.documentElement;
         
-        // Sistema de Notificações (Toast) para evitar o uso de alert()
-        function showToast(message, type = 'info') {
-            const toast = document.createElement('div');
-            toast.className = `toast ${type}`;
+        // Elementos Help
+        const btnHelp = document.getElementById('btn-help');
+        const modalHelp = document.getElementById('modal-help');
+        const btnCloseHelp = document.getElementById('btn-close-help');
+        const btnUnderstand = document.getElementById('btn-understand');
+        const modalContent = document.getElementById('modal-content');
+        
+        // Elementos Formulário
+        const userInput = document.getElementById('user-input');
+        const btnStep1 = document.getElementById('btn-step-1');
+        const btnStep2 = document.getElementById('btn-step-2');
+        const errorMsg = document.getElementById('error-message');
+        
+        // Elementos Auth (Botões header)
+        const btnLoginHeader = document.getElementById('btn-login');
+        const btnLogout = document.getElementById('btn-logout');
+        const userInfo = document.getElementById('user-info');
+        const userName = document.getElementById('user-name');
+        const userAvatar = document.getElementById('user-avatar');
+
+        // Elementos Modal Auth
+        const modalAuth = document.getElementById('modal-auth');
+        const authModalContent = document.getElementById('auth-modal-content');
+        const btnCloseAuth = document.getElementById('btn-close-auth');
+        const authForm = document.getElementById('auth-form');
+        const authTitle = document.getElementById('auth-title');
+        const btnSubmitAuth = document.getElementById('btn-submit-auth');
+        const btnToggleAuth = document.getElementById('btn-toggle-auth');
+        const authToggleText = document.getElementById('auth-toggle-text');
+        const authError = document.getElementById('auth-error');
+        const authErrorMsg = document.getElementById('auth-error-msg');
+
+        let isLoginMode = true; // Controla se está logando ou registrando
+
+        // ==========================================
+        // UTILITÁRIOS: TELA DE CARREGAMENTO
+        // ==========================================
+        function showLoading(duration = 0, callback = null) {
+            loadingScreen.classList.remove('hidden', 'opacity-0');
+            loadingScreen.classList.add('flex', 'opacity-100');
             
-            let icon = '';
-            if(type === 'error') {
-                icon = `<svg class="w-5 h-5 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>`;
-            } else if (type === 'success') {
-                icon = `<svg class="w-5 h-5 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>`;
+            if (duration > 0) {
+                setTimeout(() => {
+                    hideLoading();
+                    if(callback) callback();
+                }, duration);
+            }
+        }
+
+        function hideLoading() {
+            loadingScreen.classList.remove('opacity-100');
+            loadingScreen.classList.add('opacity-0');
+            setTimeout(() => {
+                loadingScreen.classList.remove('flex');
+                loadingScreen.classList.add('hidden');
+            }, 300);
+        }
+
+        window.addEventListener('load', () => {
+            setTimeout(hideLoading, 800);
+        });
+
+        // ==========================================
+        // LÓGICA DO TEMA
+        // ==========================================
+        if (localStorage.getItem('theme') === 'dark') {
+            htmlElement.classList.add('dark');
+            themeIcon.classList.replace('fa-moon', 'fa-sun');
+        } else {
+            htmlElement.classList.remove('dark');
+            themeIcon.classList.replace('fa-sun', 'fa-moon');
+        }
+
+        themeToggle.addEventListener('click', () => {
+            htmlElement.classList.toggle('dark');
+            if (htmlElement.classList.contains('dark')) {
+                themeIcon.classList.replace('fa-moon', 'fa-sun');
+                localStorage.setItem('theme', 'dark');
             } else {
-                icon = `<svg class="w-5 h-5 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>`;
+                themeIcon.classList.replace('fa-sun', 'fa-moon');
+                localStorage.setItem('theme', 'light');
             }
+        });
 
-            toast.innerHTML = `${icon} <span class="text-sm font-medium text-gray-800">${message}</span>`;
-            toastContainer.appendChild(toast);
-
-            // Animate in
-            setTimeout(() => toast.classList.add('show'), 10);
-
-            // Remove after 4 seconds
-            setTimeout(() => {
-                toast.classList.remove('show');
-                setTimeout(() => toast.remove(), 300);
-            }, 4000);
-        }
-
-        // Navegação entre os passos do formulário
-        function goToStep(stepId) {
-            document.querySelectorAll('.step-container').forEach(el => el.classList.remove('active'));
-            document.getElementById(`step-${stepId}`).classList.add('active');
+        // ==========================================
+        // LÓGICA DO WHATSAPP
+        // ==========================================
+        btnStep1.addEventListener('click', () => {
+            const text = userInput.value.trim();
+            if (!text) {
+                errorMsg.classList.remove('hidden');
+                userInput.classList.add('border-red-500');
+                userInput.focus();
+                return;
+            }
+            errorMsg.classList.add('hidden');
+            userInput.classList.remove('border-red-500');
             
-            if(stepConfigs[stepId]) {
-                titleEl.textContent = stepConfigs[stepId].title;
-                subtitleEl.textContent = stepConfigs[stepId].subtitle;
-            }
+            showLoading(2000, () => {
+                btnStep1.classList.add('hidden');
+                btnStep2.classList.remove('hidden');
+            });
+        });
 
-            // Focar no input correto dependendo da etapa
+        btnStep2.addEventListener('click', () => {
+            const text = userInput.value.trim();
+            const encodedText = encodeURIComponent(text);
+            const whatsappUrl = `https://wa.me/554195670609?text=${encodedText}`;
+            
+            window.open(whatsappUrl, '_blank');
+            btnStep2.classList.add('hidden');
+            btnStep1.classList.remove('hidden');
+            userInput.value = '';
+        });
+
+        userInput.addEventListener('input', () => {
+            errorMsg.classList.add('hidden');
+            userInput.classList.remove('border-red-500');
+        });
+
+        // ==========================================
+        // LÓGICA DO MODAL HELP
+        // ==========================================
+        function openHelp() {
+            modalHelp.classList.remove('hidden');
             setTimeout(() => {
-                const activeInput = document.querySelector(`#step-${stepId} input`);
-                if(activeInput) activeInput.focus();
-            }, 100);
+                modalHelp.classList.remove('opacity-0');
+                modalContent.classList.remove('scale-95');
+                modalContent.classList.add('scale-100');
+            }, 10);
         }
 
+        function closeHelp() {
+            modalHelp.classList.add('opacity-0');
+            modalContent.classList.remove('scale-100');
+            modalContent.classList.add('scale-95');
+            setTimeout(() => modalHelp.classList.add('hidden'), 300);
+        }
 
-        // 1. Processar E-mail
-        document.getElementById('form-email').addEventListener('submit', (e) => {
+        btnHelp.addEventListener('click', openHelp);
+        btnCloseHelp.addEventListener('click', closeHelp);
+        btnUnderstand.addEventListener('click', closeHelp);
+        modalHelp.addEventListener('click', (e) => { if (e.target === modalHelp) closeHelp(); });
+
+        // ==========================================
+        // FIREBASE AUTH (Nome e Senha Real)
+        // ==========================================
+        
+        function openAuthModal() {
+            modalAuth.classList.remove('hidden');
+            setTimeout(() => {
+                modalAuth.classList.remove('opacity-0');
+                authModalContent.classList.remove('scale-95');
+                authModalContent.classList.add('scale-100');
+            }, 10);
+            document.getElementById('auth-username').focus();
+        }
+
+        function closeAuthModal() {
+            modalAuth.classList.add('opacity-0');
+            authModalContent.classList.remove('scale-100');
+            authModalContent.classList.add('scale-95');
+            setTimeout(() => {
+                modalAuth.classList.add('hidden');
+                authForm.reset();
+                authError.classList.add('hidden');
+            }, 300);
+        }
+
+        // Alternar entre Entrar e Registrar
+        btnToggleAuth.addEventListener('click', () => {
+            isLoginMode = !isLoginMode;
+            authError.classList.add('hidden');
+            if (isLoginMode) {
+                authTitle.textContent = "Entrar na Conta";
+                btnSubmitAuth.textContent = "Entrar";
+                authToggleText.textContent = "Não tem uma conta?";
+                btnToggleAuth.textContent = "Registre-se";
+            } else {
+                authTitle.textContent = "Criar Nova Conta";
+                btnSubmitAuth.textContent = "Registrar-se e Entrar";
+                authToggleText.textContent = "Já tem uma conta?";
+                btnToggleAuth.textContent = "Entre aqui";
+            }
+        });
+
+        btnLoginHeader.addEventListener('click', openAuthModal);
+        btnCloseAuth.addEventListener('click', closeAuthModal);
+        modalAuth.addEventListener('click', (e) => { if (e.target === modalAuth) closeAuthModal(); });
+
+        // Processar o formulário de Login/Registro
+        authForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const emailInput = document.getElementById('email').value.trim().toLowerCase();
+            const usernameInput = document.getElementById('auth-username').value.trim().toLowerCase();
+            const passwordInput = document.getElementById('auth-password').value;
             
-            // Validação simples de e-mail
-            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailInput)) {
-                return showToast('Por favor, insira um e-mail válido.', 'error');
+            // O Firebase exige formato de email. Nós criamos um falso e invisível pro usuário usando o nome dele.
+            const fakeEmail = `${usernameInput.replace(/[^a-z0-9_.]/g, '')}@irmaostech.app`;
+
+            if (usernameInput.length < 3) {
+                authError.classList.remove('hidden');
+                authErrorMsg.textContent = "O nome deve ter pelo menos 3 caracteres.";
+                return;
             }
 
-            currentEmail = emailInput;
+            showLoading();
+            authError.classList.add('hidden');
 
-            // Lógica principal solicitada:
-            // Se já existe, pede apenas a senha.
-            // Se não existe, envia código para registrar.
-            if (usersDatabase.has(currentEmail)) {
-                document.getElementById('display-email-login').textContent = currentEmail;
-                document.getElementById('login-password').value = '';
-                goToStep('login-password');
-            } else {
-                // Simula o envio de um código (exibe na tela para testes)
-                generatedCode = Math.floor(100000 + Math.random() * 900000).toString();
-                document.getElementById('display-email-code').textContent = currentEmail;
-                document.getElementById('code').value = '';
+            try {
+                if (isLoginMode) {
+                    // Tentar logar
+                    await signInWithEmailAndPassword(auth, fakeEmail, passwordInput);
+                    closeAuthModal();
+                } else {
+                    // Tentar registrar (Se já existir nome, vai dar erro de email-already-in-use e bloqueia)
+                    if (passwordInput.length < 6) {
+                        throw { code: 'auth/weak-password' };
+                    }
+                    const userCredential = await createUserWithEmailAndPassword(auth, fakeEmail, passwordInput);
+                    // Salva o nome real da pessoa no perfil do firebase
+                    await updateProfile(userCredential.user, { displayName: usernameInput });
+                    closeAuthModal();
+                }
+            } catch (error) {
+                authError.classList.remove('hidden');
+                // Tratamento de erros do Firebase traduzidos pro usuário
+                if (error.code === 'auth/email-already-in-use') {
+                    authErrorMsg.textContent = "Esse nome de usuário já está sendo usado. Escolha outro!";
+                } else if (error.code === 'auth/invalid-credential' || error.code === 'auth/wrong-password' || error.code === 'auth/user-not-found') {
+                    authErrorMsg.textContent = "Nome de usuário ou senha incorretos.";
+                } else if (error.code === 'auth/weak-password') {
+                    authErrorMsg.textContent = "A senha deve ter no mínimo 6 caracteres.";
+                } else {
+                    authErrorMsg.textContent = "Ocorreu um erro. Tente novamente mais tarde.";
+                    console.error(error);
+                }
+            } finally {
+                hideLoading();
+            }
+        });
+
+        // Botão Deslogar
+        btnLogout.addEventListener('click', () => {
+            showLoading(1000, async () => {
+                try {
+                    await signOut(auth);
+                } catch (error) {
+                    console.error("Erro ao deslogar:", error);
+                }
+            });
+        });
+
+        // Monitora Se Tem Alguém Logado (Para manter logado ou mostrar botão de entrar)
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                // Se existe usuário logado
+                btnLoginHeader.classList.add('hidden');
+                userInfo.classList.remove('hidden');
+                userInfo.classList.add('flex');
                 
-                showToast(`(Simulação) Código enviado: ${generatedCode}`, 'info');
-                goToStep('code');
-            }
-        });
-
-        // 2. Processar Código de Verificação
-        document.getElementById('form-code').addEventListener('submit', (e) => {
-            e.preventDefault();
-            const codeInput = document.getElementById('code').value.trim();
-
-            if (codeInput === generatedCode) {
-                document.getElementById('display-email-create').textContent = currentEmail;
-                document.getElementById('new-password').value = '';
-                goToStep('create-password');
+                const display = user.displayName || user.email.split('@')[0];
+                userName.textContent = `Olá, ${display}`;
+                
+                // Gera uma foto de perfil baseada na inicial do nome dele
+                userAvatar.src = `https://ui-avatars.com/api/?name=${display}&background=2563eb&color=fff&bold=true`;
             } else {
-                showToast('Código incorreto. Tente novamente.', 'error');
+                // Se NÃO existe usuário logado
+                userInfo.classList.remove('flex');
+                userInfo.classList.add('hidden');
+                btnLoginHeader.classList.remove('hidden');
             }
         });
-
-
-        // 3. Processar Criação de Senha (Novo Usuário)
-        document.getElementById('form-create-password').addEventListener('submit', (e) => {
-            e.preventDefault();
-            const newPassword = document.getElementById('new-password').value;
-
-            // Regra: A senha tem que ter pelo menos um número ou símbolo
-            // \d verifica números, \W verifica caracteres não-alfanuméricos (símbolos)
-            // Usamos uma regex explícita para garantir precisão.
-            const hasNumberOrSymbol = /[0-9!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(newPassword);
-
-            if (!hasNumberOrSymbol) {
-                return showToast('A senha deve conter pelo menos um número ou símbolo.', 'error');
-            }
-            if (newPassword.length < 6) {
-                return showToast('A senha deve ter no mínimo 6 caracteres.', 'error');
-            }
-
-            // Salvar no "banco de dados" e fazer login
-            usersDatabase.set(currentEmail, { password: newPassword });
-            showToast('Conta registrada e logada com sucesso!', 'success');
-            goToStep('success');
-        });
-
-        // 4. Processar Login com Senha (Usuário Existente)
-        document.getElementById('form-login-password').addEventListener('submit', (e) => {
-            e.preventDefault();
-            const loginPassword = document.getElementById('login-password').value;
-            const userAccount = usersDatabase.get(currentEmail);
-
-            if (userAccount && userAccount.password === loginPassword) {
-                showToast('Login efetuado com sucesso!', 'success');
-                goToStep('success');
-            } else {
-                showToast('Senha incorreta.', 'error');
-            }
-        });
-
-        // 5. Logout (Para testar o fluxo novamente)
-        function logout() {
-            currentEmail = '';
-            generatedCode = '';
-            document.getElementById('email').value = '';
-            goToStep('email');
-            showToast('Você saiu da conta.', 'info');
-        }
 
     </script>
 </body>
